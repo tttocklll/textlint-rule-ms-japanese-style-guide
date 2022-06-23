@@ -1,5 +1,6 @@
 "use strict";
 const chouon = require("./chouon/chouon");
+const katakanaSpace = require("./katakana_space/katakana_space");
 import { matchCaptureGroupAll } from "match-index";
 import { RuleHelper } from "textlint-rule-helper";
 
@@ -18,7 +19,7 @@ const reporter = (context, options = {}) => {
 
     const reportMatch = (match, padding) => {
       const index = match.index + padding;
-      const replacer = fixer.insertTextAfterRange([index, index + 1] , ' ');
+      const replacer = fixer.insertTextAfterRange([index, index + 1], " ");
       report(
         node,
         new RuleError("スペースが必要です", {
@@ -29,6 +30,47 @@ const reporter = (context, options = {}) => {
     };
     noSpaceBefore.forEach((v) => reportMatch(v, -1));
     noSpaceAfter.forEach((v) => reportMatch(v, 0));
+  };
+
+  const checkNoSpaceBetweenKatakana = (node, text) => {
+    katakanaSpace.forEach((c) => {
+      const wrongMatches = matchCaptureGroupAll(
+        text,
+        new RegExp(`(${c.wrong})`)
+      );
+      const isMatchedIgnoreWord = (wrongWordRange, ignoreWordRange) => {
+        return (
+          ignoreWordRange[0] <= wrongWordRange[0] &&
+          wrongWordRange[1] <= ignoreWordRange[1]
+        );
+      };
+
+      wrongMatches.forEach((match) => {
+        const indexOfBugs = match.index;
+        const wordRange = [indexOfBugs, indexOfBugs + c.wrong.length];
+
+        const matchedIgnoreWords = c.ignores.some((ignore) => {
+          // match at least one ignore word
+          return matchCaptureGroupAll(text, new RegExp(`(${ignore})`)).some(
+            (match) => {
+              const ignoreWordRange = [
+                match.index,
+                match.index + ignore.length,
+              ];
+              return isMatchedIgnoreWord(wordRange, ignoreWordRange);
+            }
+          );
+        });
+        if (matchedIgnoreWords) {
+          return;
+        }
+        const ruleError = new RuleError("単語間にスペースが必要です", {
+          index: indexOfBugs, // padding of index
+          fix: fixer.replaceTextRange(wordRange, c.expect),
+        });
+        report(node, ruleError);
+      });
+    });
   };
 
   return {
@@ -86,6 +128,7 @@ const reporter = (context, options = {}) => {
       });
 
       checkNoSpace(node, text);
+      checkNoSpaceBetweenKatakana(node, text);
     },
   };
 };

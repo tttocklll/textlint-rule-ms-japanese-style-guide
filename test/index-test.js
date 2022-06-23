@@ -19,7 +19,8 @@ tester.run("rule", rule, {
         "アドバイザーはアドバイザリー契約が必要",
         "カギカッコ「Azure」は OK",
         "全角の ”Office 365” や",
-        "全角のシングル クォーテーション ‘Microsoft’ も利用可能"
+        "全角のシングル クォーテーション ‘Microsoft’ も利用可能",
+        "カタカナ 2 単語の間にはスペースが必要「エラー チェック」",
 
     ],
     invalid: [
@@ -68,6 +69,22 @@ tester.run("rule", rule, {
 
             ]
         },
+        {
+            text: "プライベートチャネルでランチミーティングを開催",
+            output: "プライベート チャネルでランチ ミーティングを開催",
+            errors: [
+                {
+                    message: "単語間にスペースが必要です",
+                    line: 1,
+                    column: 1
+                },
+                {
+                    message: "単語間にスペースが必要です",
+                    line: 1,
+                    column: 12
+                }
+            ]
+        }
 //         // multiple match
 //         {
 //             text: `It has many bugs.

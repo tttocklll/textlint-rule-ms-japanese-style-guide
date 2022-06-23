@@ -1,5 +1,5 @@
 "use strict";
-const chouon = require("./chouon");
+const chouon = require("./chouon/chouon");
 import { matchCaptureGroupAll } from "match-index";
 import { RuleHelper } from "textlint-rule-helper";
 

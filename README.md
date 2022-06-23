@@ -36,12 +36,14 @@ Microsoft [Japanese Style Guide](http://download.microsoft.com/download/b/3/4/b3
 + データベース : ‘%s’
 ```
 
+英語で 2 単語以上であるカタカナ語は、英語の単語分割に合わせて半角スペースが必要。
+[katakana_space.json](./src/katakana_space/katakana_space.json) の単語リストに対し、半角スペースが不足していないかチェックする。
+
+```diff
+- ダイアログボックス
++ ダイアログ ボックス
+```
+
 ### 長音のチェック
 
-[chouon.json](./src/chouon.json) の単語リストに対し、長音が不足していないかチェックする。
-
-## TODO
-
-英語の単語分割に合わせたスペース入りの日本語のカタカナ単語の登録
-
-ex) ダイアログ ボックス
+[chouon.json](./src/chouon/chouon.json) の単語リストに対し、長音が不足していないかチェックする。

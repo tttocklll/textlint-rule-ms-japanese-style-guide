@@ -73,6 +73,48 @@ const reporter = (context, options = {}) => {
     });
   };
 
+  const checkNoChouon = (node, text) => {
+    chouon.forEach((c) => {
+      const wrongMatches = matchCaptureGroupAll(
+        text,
+        new RegExp(`(${c.wrong}[^ー$])`)
+      );
+
+      const isMatchedIgnoreWord = (wrongWordRange, ignoreWordRange) => {
+        return (
+          ignoreWordRange[0] <= wrongWordRange[0] &&
+          wrongWordRange[1] <= ignoreWordRange[1]
+        );
+      };
+
+      wrongMatches.forEach((match) => {
+        const indexOfBugs = match.index;
+        const wordRange = [indexOfBugs, indexOfBugs + c.wrong.length];
+
+        const matchedIgnoreWords = c.ignores.some((ignore) => {
+          // match at least one ignore word
+          return matchCaptureGroupAll(text, new RegExp(`(${ignore})`)).some(
+            (match) => {
+              const ignoreWordRange = [
+                match.index,
+                match.index + ignore.length,
+              ];
+              return isMatchedIgnoreWord(wordRange, ignoreWordRange);
+            }
+          );
+        });
+        if (matchedIgnoreWords) {
+          return;
+        }
+        const ruleError = new RuleError(`${c.wrong} に長音記号が必要です`, {
+          index: indexOfBugs, // padding of index
+          fix: fixer.replaceTextRange(wordRange, c.expect),
+        });
+        report(node, ruleError);
+      });
+    });
+  }
+
   return {
     [Syntax.Str](node) {
       const isIgnoredParentNode = helper.isChildNode(node, [
@@ -87,48 +129,10 @@ const reporter = (context, options = {}) => {
       }
       // "Str" node
       const text = getSource(node); // Get text
-      chouon.forEach((c) => {
-        const wrongMatches = matchCaptureGroupAll(
-          text,
-          new RegExp(`(${c.wrong}[^ー$])`)
-        );
-
-        const isMatchedIgnoreWord = (wrongWordRange, ignoreWordRange) => {
-          return (
-            ignoreWordRange[0] <= wrongWordRange[0] &&
-            wrongWordRange[1] <= ignoreWordRange[1]
-          );
-        };
-
-        wrongMatches.forEach((match) => {
-          const indexOfBugs = match.index;
-          const wordRange = [indexOfBugs, indexOfBugs + c.wrong.length];
-
-          const matchedIgnoreWords = c.ignores.some((ignore) => {
-            // match at least one ignore word
-            return matchCaptureGroupAll(text, new RegExp(`(${ignore})`)).some(
-              (match) => {
-                const ignoreWordRange = [
-                  match.index,
-                  match.index + ignore.length,
-                ];
-                return isMatchedIgnoreWord(wordRange, ignoreWordRange);
-              }
-            );
-          });
-          if (matchedIgnoreWords) {
-            return;
-          }
-          const ruleError = new RuleError(`${c.wrong} に長音記号が必要です`, {
-            index: indexOfBugs, // padding of index
-            fix: fixer.replaceTextRange(wordRange, c.expect),
-          });
-          report(node, ruleError);
-        });
-      });
-
+      
       checkNoSpace(node, text);
       checkNoSpaceBetweenKatakana(node, text);
+      checkNoChouon(node, text);
     },
   };
 };

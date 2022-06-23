@@ -1,1 +1,1 @@
-module.exports = require('./space.json')
+module.exports = require('./katakana_space.json')

@@ -74,12 +74,12 @@ tester.run("rule", rule, {
             output: "プライベート チャネルでランチ ミーティングを開催",
             errors: [
                 {
-                    message: "単語間にスペースが必要です",
+                    message: "「プライベートチャネル」は単語間にスペースが必要です",
                     line: 1,
                     column: 1
                 },
                 {
-                    message: "単語間にスペースが必要です",
+                    message: "「ランチミーティング」は単語間にスペースが必要です",
                     line: 1,
                     column: 12
                 }

@@ -64,7 +64,7 @@ const reporter = (context, options = {}) => {
         if (matchedIgnoreWords) {
           return;
         }
-        const ruleError = new RuleError("単語間にスペースが必要です", {
+        const ruleError = new RuleError(`「${c.wrong}」は単語間にスペースが必要です`, {
           index: indexOfBugs, // padding of index
           fix: fixer.replaceTextRange(wordRange, c.expect),
         });
